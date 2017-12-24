@@ -130,7 +130,7 @@ def main():
     # starting position against the same adversaries in the tournament
     test_agents = [
          Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
-#        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved"),
+        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved"),
 #        Agent(AlphaBetaPlayer(score_fn=custom_score), "AB_Custom"),
 #        Agent(AlphaBetaPlayer(score_fn=custom_score_2), "AB_Custom_2"),
 #        Agent(AlphaBetaPlayer(score_fn=custom_score_3), "AB_Custom_3")
@@ -142,9 +142,9 @@ def main():
         Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
         Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
         Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),
-        #Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
-        #Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
-        #Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
+        Agent(AlphaBetaPlayer(score_fn=open_move_score), "AB_Open"),
+        Agent(AlphaBetaPlayer(score_fn=center_score), "AB_Center"),
+        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved")
     ]
 
     print(DESCRIPTION)
