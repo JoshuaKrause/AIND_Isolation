@@ -117,6 +117,22 @@ class IsolationPlayer:
         self.score = score_fn
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
+        
+    def initialize_default_move(self, game):
+        """ Initialize a default best move to return if the game times out.
+        Returns the first legal move unless none exist.
+        
+        Parameters
+        ----------
+        game : `isolation.Board`
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+        """
+        if not game.get_legal_moves():
+            return (-1, -1)
+        else: 
+            return game.get_legal_moves()[0]
+        
 
 
 class MinimaxPlayer(IsolationPlayer):
@@ -157,8 +173,8 @@ class MinimaxPlayer(IsolationPlayer):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
-
+        self.best_move = self.initialize_default_move(game)
+        
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
@@ -168,7 +184,7 @@ class MinimaxPlayer(IsolationPlayer):
             pass  # Handle any actions required after timeout as needed
 
         # Return the best move from the last completed search iteration
-        return best_move
+        return self.best_move
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
@@ -211,16 +227,14 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-            
-        moves = game.get_legal_moves()
-        best_move = None
+        
         best_score = float("-inf")
-        for move in moves:
-            score = self.min_value(game.forecast_move(move))
+        for move in game.get_legal_moves():
+            score = self.min_value(game.forecast_move(move), depth - 1)
             if score > best_score:
                 best_score = score
-                best_move = move
-        return best_move
+                self.best_move = move
+        return self.best_move
     
     def terminal_test(self, game):
         """ Return True if the game is over for the active player
@@ -231,37 +245,35 @@ class MinimaxPlayer(IsolationPlayer):
         else:
             return False
 
-    def min_value(self, game, current_depth = 0):
+    def min_value(self, game, current_depth):
         """ Return the value for a win (+1) if the game is over,
         otherwise return the minimum value over all legal child
         nodes.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()        
-        if self.terminal_test(game) or current_depth == self.search_depth:
+        if self.terminal_test(game) or current_depth == 0:
             return self.score(game, self)
         else:
-            current_depth = current_depth + 1
             v = float("inf")
             for move in game.get_legal_moves():
-                v = min(v, self.max_value(game.forecast_move(move), current_depth))
+                v = min(v, self.max_value(game.forecast_move(move), current_depth - 1))
             return v
     
     
-    def max_value(self, game, current_depth = 0):
+    def max_value(self, game, current_depth):
         """ Return the value for a loss (-1) if the game is over,
         otherwise return the maximum value over all legal child
         nodes.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        if self.terminal_test(game) or current_depth == self.search_depth:
+        if self.terminal_test(game) or current_depth == 0:
             return self.score(game, self)
         else: 
-            current_depth = current_depth + 1
             v = float("-inf")
             for move in game.get_legal_moves():
-                v = max(v, self.min_value(game.forecast_move(move), current_depth))
+                v = max(v, self.min_value(game.forecast_move(move), current_depth - 1))
             return v
 
 
@@ -305,18 +317,23 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
-
+        self.best_move = self.initialize_default_move(game)
+        
+        current_best = None
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            return self.alphabeta(game, self.search_depth)
+            iterative_depth = 0
+            while iterative_depth < float("inf"):
+                current_best = self.alphabeta(game, iterative_depth)
+                iterative_depth += 1
+            return current_best
 
         except SearchTimeout:
-            pass  # Handle any actions required after timeout as needed
+            return current_best
 
         # Return the best move from the last completed search iteration
-        return best_move
+        return self.best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -368,16 +385,14 @@ class AlphaBetaPlayer(IsolationPlayer):
             
         self.alpha = alpha
         self.beta = beta
-            
-        moves = game.get_legal_moves()
-        best_move = None
+        
         best_score = float("-inf")
-        for move in moves:
-            score = self.min_value(game.forecast_move(move))
+        for move in game.get_legal_moves():            
+            score = self.min_value(game.forecast_move(move), depth-1)
             if score > best_score:
                 best_score = score
-                best_move = move
-        return best_move
+                self.best_move = move
+        return self.best_move
     
     def terminal_test(self, game):
         """ Return True if the game is over for the active player
@@ -388,40 +403,38 @@ class AlphaBetaPlayer(IsolationPlayer):
         else:
             return False
 
-    def min_value(self, game, current_depth = 0):
+    def min_value(self, game, current_depth):
         """ Return the value for a win (+1) if the game is over,
         otherwise return the minimum value over all legal child
         nodes.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        if self.terminal_test(game) or current_depth == self.search_depth:
+        if self.terminal_test(game) or current_depth == 0:
             return self.score(game, self)
         else:
-            current_depth = current_depth + 1
             v = float("inf")
             for move in game.get_legal_moves():
-                v = min(v, self.max_value(game.forecast_move(move), current_depth))
+                v = min(v, self.max_value(game.forecast_move(move), current_depth - 1))
                 if v <= self.alpha:
                     return v
                 self.beta = max(v, self.beta)
             return v
     
     
-    def max_value(self, game, current_depth = 0):
+    def max_value(self, game, current_depth):
         """ Return the value for a loss (-1) if the game is over,
         otherwise return the maximum value over all legal child
         nodes.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        if self.terminal_test(game) or current_depth == self.search_depth:
+        if self.terminal_test(game) or current_depth == 0:
             return self.score(game, self)
         else: 
-            current_depth = current_depth + 1
             v = float("-inf")
             for move in game.get_legal_moves():
-                v = max(v, self.min_value(game.forecast_move(move), current_depth))
+                v = max(v, self.min_value(game.forecast_move(move), current_depth - 1))
                 if v >= self.beta:
                     return v
                 self.alpha = min(v, self.alpha)
