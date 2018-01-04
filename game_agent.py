@@ -38,17 +38,16 @@ def custom_score(game, player):
 
     if game.is_winner(player):
         return float("inf")
-
+    
+    ''' Find the player's distance from the center. '''
     p1_pos = game.get_player_location(player)
     center = int(game.height / 2), int(game.width / 2)
     dist = (p1_pos[0] - center[0])**2 + (p1_pos[1] - center[1])**2
 
-    #print('P1 POS: {0} ! DIST: {1}'.format(p1_pos, dist))
-
     p1_moves = len(game.get_legal_moves(player))
     p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    
-    return float(p1_moves - p2_moves - dist ** 2)
+
+    return float(p1_moves - p2_moves * 2 - dist ** 2)
 
 
 def custom_score_2(game, player):
@@ -78,12 +77,16 @@ def custom_score_2(game, player):
 
     if game.is_winner(player):
         return float("inf")
-      
+    
+    ''' If the opposing player exists on the board, determine the distance between
+    the two pieces and multiply by the number of available moves. '''   
     p1_pos = game.get_player_location(player)
     p2_pos = game.get_player_location(game.get_opponent(player))
     dist = (p1_pos[0] - p2_pos[0])**2 + (p1_pos[1] - p2_pos[1])**2
 
-    return float(dist ** len(game.get_legal_moves()))
+    p1_moves = len(game.get_legal_moves(player))
+    p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(((dist * .2) / game.move_count) * (p1_moves - p2_moves))
         
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -112,26 +115,15 @@ def custom_score_3(game, player):
 
     if game.is_winner(player):
         return float("inf")
-    
-    x1, y1 = game.get_player_location(player)
-    x2, y2 = game.get_player_location(game.get_opponent(player))
-    
-    directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-    
-    p1_surround = [(x1 + dr, y1 + dc) for dr, dc in directions]
-    p2_surround = [(x2 + dr, y2 + dc) for dr, dc in directions]
-    
-    p1_open_spaces = len(list(set(p1_surround).intersection(game.get_legal_moves())))
-    p2_open_spaces = len(list(set(p2_surround).intersection(game.get_legal_moves(game.get_opponent(player)))))
-    
-#    moves = game.move_count
-#    blanks = len(game.get_blank_spaces())
-#    
-#    active_player_moves = len(game.get_legal_moves())
-#    inactive_player_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    
-    return float(p1_open_spaces - p2_open_spaces)
 
+    center = int(game.height / 2), int(game.width / 2)
+    player_location = game.get_player_location(player)    
+    axis_distance = max(tuple(map(lambda x: abs(x - center[0]), player_location)))
+
+    p1_moves = len(game.get_legal_moves(player))
+    p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    return float((p1_moves - p2_moves * 2) * axis_distance ** 2)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never

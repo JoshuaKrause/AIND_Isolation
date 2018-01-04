@@ -21,7 +21,7 @@ class IsolationTest(unittest.TestCase):
     def setUp(self):
         reload(game_agent)
         self.player1 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score)
-        self.player2 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score_2)
+        self.player2 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score_3)
         self.game = isolation.Board(self.player1, self.player2)
 
     def next_move(self, game, player):        
@@ -35,12 +35,10 @@ class IsolationTest(unittest.TestCase):
 
     def test_quick_run(self):
         self.game.apply_move((0,0))
-        for i in range(2):
+        for i in range(5):
             print(self.game.active_player)
             self.cycle_moves()
             print(self.game.to_string())
-        
-
 
 if __name__ == '__main__':
     try:
