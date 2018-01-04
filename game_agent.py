@@ -4,7 +4,6 @@ and include the results in your report.
 """
 import random
 
-
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
@@ -34,8 +33,22 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    p1_pos = game.get_player_location(player)
+    center = int(game.height / 2), int(game.width / 2)
+    dist = (p1_pos[0] - center[0])**2 + (p1_pos[1] - center[1])**2
+
+    #print('P1 POS: {0} ! DIST: {1}'.format(p1_pos, dist))
+
+    p1_moves = len(game.get_legal_moves(player))
+    p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    return float(p1_moves - p2_moves - dist ** 2)
 
 
 def custom_score_2(game, player):
@@ -60,10 +73,18 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
 
+    if game.is_winner(player):
+        return float("inf")
+      
+    p1_pos = game.get_player_location(player)
+    p2_pos = game.get_player_location(game.get_opponent(player))
+    dist = (p1_pos[0] - p2_pos[0])**2 + (p1_pos[1] - p2_pos[1])**2
 
+    return float(dist ** len(game.get_legal_moves()))
+        
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -86,8 +107,30 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+    
+    x1, y1 = game.get_player_location(player)
+    x2, y2 = game.get_player_location(game.get_opponent(player))
+    
+    directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+    
+    p1_surround = [(x1 + dr, y1 + dc) for dr, dc in directions]
+    p2_surround = [(x2 + dr, y2 + dc) for dr, dc in directions]
+    
+    p1_open_spaces = len(list(set(p1_surround).intersection(game.get_legal_moves())))
+    p2_open_spaces = len(list(set(p2_surround).intersection(game.get_legal_moves(game.get_opponent(player)))))
+    
+#    moves = game.move_count
+#    blanks = len(game.get_blank_spaces())
+#    
+#    active_player_moves = len(game.get_legal_moves())
+#    inactive_player_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    return float(p1_open_spaces - p2_open_spaces)
 
 
 class IsolationPlayer:
@@ -133,7 +176,6 @@ class IsolationPlayer:
         else: 
             return game.get_legal_moves()[0]
         
-
 
 class MinimaxPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using depth-limited minimax
@@ -181,7 +223,10 @@ class MinimaxPlayer(IsolationPlayer):
             return self.minimax(game, self.search_depth)
 
         except SearchTimeout:
-            return best_move  # Handle any actions required after timeout as needed
+            pass
+            #print("Returned default: {0}".format(best_move))
+
+        return best_move  # Handle any actions required after timeout as needed
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
@@ -318,17 +363,21 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         best_move = self.initialize_default_move(game)
-        
+        #print("Default move: {}".format(best_move))
+
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
             iterative_depth = 1
-            while iterative_depth < float("inf"):
+            while True:
                 best_move = self.alphabeta(game, iterative_depth)
                 iterative_depth += 1
 
         except SearchTimeout:
-            return best_move
+            pass
+        
+        #print('Returned: {0}'.format(best_move))
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -388,6 +437,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 best_score = score
                 best_move = move
             alpha = max(best_score, alpha)
+            #print("Best move: {0} ({1})".format(best_move, best_score))
         return best_move
     
     def terminal_test(self, game):
