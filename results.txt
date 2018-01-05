@@ -1,0 +1,32 @@
+
+                        *************************                         
+                             Playing Matches                              
+                        *************************                         
+
+ Match #   Opponent    AB_Improved   AB_Custom   AB_Custom_2  AB_Custom_3 
+                        Won | Lost   Won | Lost   Won | Lost   Won | Lost 
+    1       Random      85  |  15    88  |  12    92  |   8    91  |   9  
+    2       MM_Open     61  |  39    59  |  41    64  |  36    69  |  31  
+    3      MM_Center    85  |  15    89  |  11    84  |  16    87  |  13  
+    4     MM_Improved   68  |  32    80  |  20    76  |  24    74  |  26  
+    5       AB_Open     58  |  42    51  |  49    49  |  51    54  |  46  
+    6      AB_Center    61  |  39    59  |  41    58  |  42    54  |  46     
+    7     AB_Improved   45  |  55    46  |  54    55  |  45    54  |  46  
+--------------------------------------------------------------------------
+           Win Rate:      66.1%        67.4%        68.3%        69.0%    
+
+                        *************************                         
+                             Playing Matches                              
+                        *************************                         
+
+ Match #   Opponent    AB_Improved   AB_Custom   AB_Custom_2  AB_Custom_3 
+                        Won | Lost   Won | Lost   Won | Lost   Won | Lost 
+    1       Random      94  |   6    93  |   7    94  |   6    90  |  10  
+    2       MM_Open     81  |  19    69  |  31    78  |  22    76  |  24  
+    3      MM_Center    86  |  14    84  |  16    90  |  10    87  |  13  
+    4     MM_Improved   73  |  27    71  |  29    80  |  20    71  |  29  
+    5       AB_Open     54  |  46    49  |  51    55  |  45    43  |  57  
+    6      AB_Center    65  |  35    56  |  44    57  |  43    49  |  51  
+    7     AB_Improved   49  |  51    43  |  57    50  |  50    54  |  46  
+--------------------------------------------------------------------------
+           Win Rate:      71.7%        66.4%        72.0%        67.1% 

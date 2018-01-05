@@ -8,6 +8,18 @@ class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
 
+def normalize(coordinates, center):
+    out = []
+    for coord in coordinates:
+        n = coord - center[0]
+        if n > 0:
+            n = 1
+        elif n < 0:
+            n = -1
+        else:
+            n = n
+        out.append(n)
+    return tuple(out)
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -39,16 +51,17 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
     
-    ''' Find the player's distance from the center. '''
     p1_pos = game.get_player_location(player)
+    p2_pos = game.get_player_location(game.get_opponent(player))
     center = int(game.height / 2), int(game.width / 2)
-    dist = (p1_pos[0] - center[0])**2 + (p1_pos[1] - center[1])**2
 
+    ''' Compare which quadrants the players are in. Returns 0 (opposite quadrant) to 4 (same quadrant) '''
+    quadrant_difference = abs(sum(normalize(p1_pos, center)) + sum(normalize(p2_pos, center)))
+ 
     p1_moves = len(game.get_legal_moves(player))
     p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    return float(p1_moves - p2_moves * 2 - dist ** 2)
-
+    return float(p1_moves - p2_moves - quadrant_difference ** 2)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -86,7 +99,7 @@ def custom_score_2(game, player):
 
     p1_moves = len(game.get_legal_moves(player))
     p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(((dist * .2) / game.move_count) * (p1_moves - p2_moves))
+    return float((dist / game.move_count) * (p1_moves * 2 - p2_moves))
         
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -118,12 +131,12 @@ def custom_score_3(game, player):
 
     center = int(game.height / 2), int(game.width / 2)
     player_location = game.get_player_location(player)    
-    axis_distance = max(tuple(map(lambda x: abs(x - center[0]), player_location)))
+    axis_distance = max(map(lambda x: abs(x - center[0]), player_location))
 
     p1_moves = len(game.get_legal_moves(player))
     p2_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    return float((p1_moves - p2_moves * 2) * axis_distance ** 2)
+    return float(p1_moves - p2_moves * 2 - axis_distance ** 2)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -147,7 +160,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=20.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None

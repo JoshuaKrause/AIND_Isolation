@@ -34,8 +34,8 @@ class IsolationTest(unittest.TestCase):
         self.game.apply_move(self.next_move(self.game, self.game.active_player))
 
     def test_quick_run(self):
-        self.game.apply_move((0,0))
-        for i in range(5):
+        self.game.apply_move((2,2))
+        for i in range(10):
             print(self.game.active_player)
             self.cycle_moves()
             print(self.game.to_string())
